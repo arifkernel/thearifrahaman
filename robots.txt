@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://thearifrahaman.dpdns.org/sitemap.xml
