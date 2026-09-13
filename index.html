@@ -121,6 +121,52 @@ footer{padding:7vh 7vw;flex-direction:column;gap:18px;font-size:8px}.links{gap:1
     padding:12px 13px;
   }
 }
+
+<style>
+.play-section .content{grid-template-columns:.72fr 1.28fr}
+.play-card{
+  display:block;position:relative;min-height:300px;padding:42px;
+  border:1px solid rgba(255,255,255,.24);
+  background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.012));
+  overflow:hidden;transition:transform .45s ease,border-color .45s ease,background .45s ease;
+}
+.play-card:before{
+  content:"";position:absolute;width:260px;height:260px;right:-80px;bottom:-120px;
+  border:1px solid rgba(255,255,255,.18);border-radius:50%;
+  box-shadow:0 0 0 34px rgba(255,255,255,.018),0 0 0 68px rgba(255,255,255,.012);
+}
+.play-card:hover{
+  transform:translateY(-6px);border-color:rgba(255,255,255,.5);
+  background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.025));
+}
+.play-index{font-size:9px;letter-spacing:.2em;opacity:.55}
+.play-card h3{
+  font-family:"Playfair Display",serif;font-size:clamp(58px,8vw,120px);
+  line-height:.82;font-weight:500;letter-spacing:-.055em;margin:30px 0 22px;
+}
+.play-card p{font-size:10px;line-height:1.9;letter-spacing:.11em;max-width:390px;opacity:.62}
+.play-go{
+  position:absolute;right:38px;top:38px;font-size:25px;opacity:.7;
+  transition:transform .3s ease,opacity .3s ease
+}
+.play-card:hover .play-go{transform:translate(5px,-5px);opacity:1}
+.play-cta{
+  display:inline-block;margin-top:28px;padding:10px 14px;border:1px solid rgba(255,255,255,.32);
+  font-size:9px;letter-spacing:.16em;transition:.3s
+}
+.play-card:hover .play-cta{background:#fff;color:#050a10}
+@media(max-width:700px){
+  .nav{gap:10px}
+  .nav a{font-size:7px}
+  .play-section .content{grid-template-columns:1fr;gap:5vh}
+  .play-card{min-height:250px;padding:26px}
+  .play-card h3{font-size:25vw;margin:25px 0 18px}
+  .play-go{right:22px;top:22px}
+  .play-card p{font-size:8px}
+  .play-cta{font-size:8px}
+}
+</style>
+
 </style>
 
 <script type="application/ld+json">
@@ -163,7 +209,7 @@ footer{padding:7vh 7vw;flex-direction:column;gap:18px;font-size:8px}.links{gap:1
 
 <main>
 <section class="hero" id="home">
-<header><a class="brand magnetic" href="#home" aria-label="Arif Rahaman home"><img src="assets/ar-monogram.png" alt="AR"></a><nav class="nav"><a class="magnetic" href="#about">ABOUT</a><a class="magnetic" href="#projects">IDEAS</a><a class="magnetic" href="#contact">CONTACT</a><div class="tool-menu"><a class="magnetic tool-link" href="javascript:void(0)">TOOL</a><div class="tool-dropdown">
+<header><a class="brand magnetic" href="#home" aria-label="Arif Rahaman home"><img src="assets/ar-monogram.png" alt="AR"></a><nav class="nav"><a class="magnetic" href="#about">ABOUT</a><a class="magnetic" href="#projects">IDEAS</a><a class="magnetic" href="#play">PLAY</a><a class="magnetic" href="#contact">CONTACT</a><div class="tool-menu"><a class="magnetic tool-link" href="javascript:void(0)">TOOL</a><div class="tool-dropdown">
 <a href="cgpa-calculator.html">CGPA CALCULATOR</a>
 <a href="404.html">404 EXPERIENCE</a>
 </div></div></nav></header>
@@ -187,8 +233,22 @@ footer{padding:7vh 7vw;flex-direction:column;gap:18px;font-size:8px}.links{gap:1
 </div>
 </div></section>
 
+
+<section class="panel play-section" id="play"><div class="content">
+<div class="reveal"><div class="num">03 / PLAY</div><h2 class="title">PLAY<br>GROUND.</h2><p class="small">Experiences built just for fun.</p></div>
+<div class="reveal">
+<a class="play-card magnetic" href="play.html" aria-label="Open Chess game">
+  <span class="play-index">01 / GAME</span>
+  <span class="play-go">↗</span>
+  <h3>CHESS.</h3>
+  <p>STEP INTO THE BOARD. PLAY HUMAN VS HUMAN AND LET EVERY MOVE CHANGE THE GAME.</p>
+  <span class="play-cta">PLAY CHESS ↗</span>
+</a>
+</div>
+</div></section>
+
 <section class="panel" id="contact"><div class="content">
-<div class="reveal"><div class="num">03 / CONTACT</div><h2 class="title">LET'S<br>TALK.</h2></div>
+<div class="reveal"><div class="num">04 / CONTACT</div><h2 class="title">LET'S<br>TALK.</h2></div>
 <div class="reveal contact-block"><p class="lead">Have an idea, a project, or an opportunity? I'd love to hear about it.</p><p class="small">Whether it's building something from scratch, collaborating on an idea, or simply starting a conversation — send me a message.</p><div class="contact-links"><a class="contact-link magnetic" href="mailto:arifrahaman3270@gmail.com" aria-label="Email Arif Rahaman"><span class="contact-icon email-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"></rect><path d="m4 7 8 6 8-6"></path></svg></span><b>EMAIL</b><i>↗</i></a><a class="contact-link magnetic" href="https://www.instagram.com/arif___rahaman/" target="_blank" rel="noopener" aria-label="Instagram — @arif___rahaman"><span class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5"></rect><circle cx="12" cy="12" r="4.1"></circle><circle cx="17.6" cy="6.5" r="1"></circle></svg></span><b>INSTAGRAM</b><i>↗</i></a><a class="contact-link magnetic" href="https://in.linkedin.com/in/arif-rahaman-8b083b293" target="_blank" rel="noopener" aria-label="LinkedIn — Arif Rahaman"><span class="contact-icon linkedin-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8.2V19H2.5V8.2H5ZM3.75 4.8a1.45 1.45 0 1 1 0 2.9 1.45 1.45 0 0 1 0-2.9ZM8 8.2h2.4v1.48h.04c.33-.63 1.14-1.83 3.2-1.83 3.42 0 4.06 2.25 4.06 5.18V19h-2.5v-5.28c0-1.26-.02-2.88-1.75-2.88-1.75 0-2.02 1.37-2.02 2.79V19H8V8.2Z"></path></svg></span><b>LINKEDIN</b><i>↗</i></a></div></div>
 </div></section>
 <footer><span>© 2026 ARIF RAHAMAN</span><div class="links"><a href="#home">BACK TO TOP</a><a href="#contact">CONTACT</a></div></footer>

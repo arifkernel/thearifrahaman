@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#030303">
+<title>THE CHESS DIMENSION — Arif Rahaman</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020202;color:#fff;font-family:Arial,Helvetica,sans-serif}
+button,a{font:inherit}
+body{touch-action:none}
+#app{position:fixed;inset:0;background:radial-gradient(circle at 50% 45%,#15171a 0,#08090b 35%,#020202 75%);overflow:hidden}
+#particles{position:absolute;inset:0;pointer-events:none}
+.dot{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:.25;animation:rise linear infinite}
+@keyframes rise{to{transform:translate3d(var(--x),-120px,0);opacity:0}}
+
+.loader{position:fixed;inset:0;z-index:1000;background:#020202;display:grid;place-items:center;transition:.6s}
+.loader.off{opacity:0;visibility:hidden}
+.loaderText{text-align:center;font-size:9px;letter-spacing:.38em;opacity:.55}
+.loaderBar{width:170px;height:1px;background:#222;margin:18px auto 0;overflow:hidden}
+.loaderBar i{display:block;width:40%;height:100%;background:#ddd;animation:load 1s infinite}
+@keyframes load{from{transform:translateX(-120%)}to{transform:translateX(350%)}}
+
+.hud{position:fixed;inset:0;z-index:30;pointer-events:none}
+.top{position:absolute;top:27px;left:42px;right:42px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-size:10px;letter-spacing:.34em}
+.nav{display:flex;gap:22px}
+.nav a,.nav button{pointer-events:auto;border:0;background:none;color:#fff;text-decoration:none;font-size:8px;letter-spacing:.2em;opacity:.55;cursor:pointer}
+.nav a:hover,.nav button:hover{opacity:1}
+
+.title{position:absolute;top:16%;left:5vw}
+.eyebrow{font-size:8px;letter-spacing:.32em;opacity:.38;margin-bottom:14px}
+.title h1{font-size:clamp(48px,7vw,96px);font-weight:400;line-height:.83;letter-spacing:-.065em;margin:0}
+.desc{margin-top:21px;max-width:300px;font-size:8px;line-height:1.9;letter-spacing:.15em;text-transform:uppercase;opacity:.38}
+
+.panel{position:absolute;right:42px;top:50%;transform:translateY(-50%);width:215px;pointer-events:auto}
+.panelLabel{font-size:8px;letter-spacing:.28em;opacity:.4}
+.turn{font-size:19px;letter-spacing:.08em;margin:11px 0 15px}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+.btn{min-height:40px;padding:9px 12px;border:1px solid rgba(255,255,255,.24);background:rgba(0,0,0,.35);color:#fff;font-size:7px;letter-spacing:.18em;cursor:pointer}
+.btn:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+.msg{margin-top:13px;min-height:27px;font-size:7px;line-height:1.8;letter-spacing:.13em;text-transform:uppercase;opacity:.48}
+.return{position:absolute;left:42px;top:53%;pointer-events:auto;color:#fff;text-decoration:none;font-size:7px;letter-spacing:.25em;opacity:.35;transform:rotate(-90deg);transform-origin:left top}
+.return:hover{opacity:1}
+.bottom{position:absolute;left:42px;right:42px;bottom:28px;display:flex;justify-content:space-between;font-size:7px;letter-spacing:.2em;opacity:.35}
+
+/* 3D presentation */
+.stage{position:absolute;left:50%;top:57%;width:min(48vw,620px);aspect-ratio:1;transform:translate(-50%,-50%) perspective(1100px) rotateX(54deg) rotateZ(-2deg);transform-style:preserve-3d;transition:transform .15s ease}
+.base{position:absolute;inset:-34px;background:linear-gradient(135deg,#1a1b1e,#060607 52%,#17181b);border:2px solid #36373a;transform:translateZ(-48px);box-shadow:0 45px 65px rgba(0,0,0,.9),inset 0 0 30px rgba(255,255,255,.035);transform-style:preserve-3d}
+.base:before{content:"";position:absolute;inset:10px;border:1px solid rgba(205,164,96,.32)}
+.base:after{content:"";position:absolute;left:12px;right:12px;bottom:-18px;height:18px;background:#090a0b;transform:skewX(-45deg);transform-origin:top;opacity:.8}
+
+.board{position:absolute;inset:0;display:grid;grid-template-columns:repeat(8,1fr);border:9px solid #111215;transform-style:preserve-3d;box-shadow:0 25px 35px rgba(0,0,0,.8),0 0 40px rgba(255,255,255,.035)}
+.sq{position:relative;border:0;padding:0;min-width:0;cursor:pointer;transform-style:preserve-3d}
+.sq.light{background:linear-gradient(135deg,#9b9c9e,#65666a 55%,#838487)}
+.sq.dark{background:linear-gradient(135deg,#202124,#08090b 58%,#16171a)}
+.sq:hover{filter:brightness(1.18)}
+.sq.selected{box-shadow:inset 0 0 0 3px #fff,inset 0 0 25px rgba(255,255,255,.22)}
+.sq.legal:after{content:"";position:absolute;left:50%;top:50%;width:24%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:#d9dce0;box-shadow:0 0 17px rgba(255,255,255,.65);pointer-events:none}
+.sq.capture{box-shadow:inset 0 0 0 3px #bd806a,inset 0 0 25px rgba(190,90,60,.3)}
+.sq.last{box-shadow:inset 0 0 0 2px rgba(220,190,130,.55)}
+
+.piece{position:absolute;left:50%;top:50%;width:85%;height:90%;display:grid;place-items:center;transform:translate(-50%,-54%) translateZ(28px);transform-style:preserve-3d;pointer-events:none;transition:transform .18s ease,filter .18s ease}
+.symbol{font-family:"Times New Roman",serif;font-size:clamp(35px,5.1vw,70px);line-height:1;transform:rotateX(-54deg) translateZ(15px);transform-style:preserve-3d}
+.white .symbol{text-shadow:1px 1px #aaa,2px 2px #888,3px 3px #666,4px 4px #444,7px 10px 9px #000,0 0 14px rgba(255,255,255,.18);color:#eee}
+.black .symbol{text-shadow:1px 1px #555,2px 2px #3a3a3a,3px 3px #222,4px 4px #111,7px 10px 9px #000;color:#0b0c0e}
+.piece:after{content:"";position:absolute;left:50%;bottom:4%;width:45%;height:13%;transform:translateX(-50%) rotateX(54deg);border-radius:50%;background:radial-gradient(ellipse at 35% 25%,#fff,#777 40%,#222 75%);box-shadow:0 8px 12px #000;z-index:-1}
+.black.piece:after{background:radial-gradient(ellipse at 35% 25%,#555,#17181a 45%,#030303 78%)}
+.piece.hop{animation:hop .52s cubic-bezier(.2,.8,.2,1)}
+@keyframes hop{0%{transform:translate(-50%,-54%) translateZ(28px)}45%{transform:translate(-50%,-105%) translateZ(80px) scale(1.06)}100%{transform:translate(-50%,-54%) translateZ(28px)}}
+
+.mode{position:fixed;inset:0;z-index:500;background:rgba(2,2,2,.9);backdrop-filter:blur(14px);display:grid;place-items:center;opacity:0;visibility:hidden;transition:.45s}
+.mode.show{opacity:1;visibility:visible}
+.modeBox{width:min(90vw,430px);text-align:center}
+.modeEyebrow{font-size:8px;letter-spacing:.35em;opacity:.4;margin-bottom:15px}
+.modeTitle{font-size:clamp(28px,5vw,46px);letter-spacing:-.05em;margin-bottom:25px}
+.modeBtn{width:100%;height:50px;margin:5px 0;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.035);color:#fff;font-size:8px;letter-spacing:.2em;cursor:pointer}
+.modeBtn:hover{background:rgba(255,255,255,.09);border-color:#fff}
+.modeBtn.disabled{opacity:.3;cursor:not-allowed}
+
+.toast{position:fixed;z-index:700;left:50%;bottom:12%;transform:translate(-50%,20px);padding:11px 15px;border:1px solid #333;background:rgba(0,0,0,.78);font-size:7px;letter-spacing:.2em;opacity:0;transition:.25s;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:800px){
+.top{top:17px;left:18px;right:18px}.brand{font-size:8px}.nav{gap:14px}.nav a,.nav button{font-size:6.5px}
+.title{top:9%;left:5vw}.eyebrow{font-size:6.5px}.title h1{font-size:clamp(40px,12vw,64px)}.desc{display:none}
+.stage{top:48%;width:78vw;transform:translate(-50%,-50%) perspective(850px) rotateX(54deg) rotateZ(-2deg)}
+.panel{right:5vw;bottom:6%;top:auto;transform:none;width:175px}.panelLabel{font-size:6px}.turn{font-size:15px;margin:8px 0 10px}.btn{min-height:42px;padding:9px;font-size:6.5px}.msg{font-size:6px}.return{display:none}.bottom{left:5vw;right:5vw;bottom:17px;font-size:6px}.bottom span:last-child{display:none}
+}
+@media(max-width:480px){
+.stage{width:82vw;top:46%}.title h1{font-size:42px}.panel{width:160px;bottom:6%}.turn{font-size:14px}.bottom{display:none}
+}
+</style>
+
+
+
+<style>
+#newGame,#resetTop,#flip,
+button.new-game,button.flip-board,
+.actions{display:none !important}
+</style>
+
+<style>
+/* Chess HUD stays outside the board in focused game mode */
+body.game-focus .panel{
+  position:fixed !important;
+  left:50% !important;
+  right:auto !important;
+  bottom:auto !important;
+  top:7vh !important;
+  transform:translateX(-50%) !important;
+  width:min(92vw,720px) !important;
+  text-align:center !important;
+  z-index:20 !important;
+  pointer-events:none !important;
+}
+body.game-focus .panelLabel{display:none !important}
+body.game-focus .turn{
+  margin:0 !important;
+  font-size:clamp(20px,3vw,32px) !important;
+  letter-spacing:.08em !important;
+}
+body.game-focus .msg{
+  margin-top:9px !important;
+  font-size:10px !important;
+  letter-spacing:.12em !important;
+  opacity:.62 !important;
+}
+body.game-focus .stage{
+  top:58% !important;
+}
+@media(max-width:800px){
+  body.game-focus .panel{
+    top:5vh !important;
+    width:94vw !important;
+  }
+  body.game-focus .turn{
+    font-size:20px !important;
+  }
+  body.game-focus .msg{
+    font-size:8px !important;
+    margin-top:7px !important;
+  }
+  body.game-focus .stage{
+    top:57% !important;
+  }
+}
+</style>
+
+<style>
+/* Remove the Chess Dimension intro artwork/title; open directly into the game chooser. */
+.title, .hero-title, .hero, .landing, .intro, .game-intro,
+#hero, #landing, #intro, #titleScreen { display:none !important; }
+</style>
+
+<style>
+#gameEndOverlay{
+  position:fixed;inset:0;z-index:10000;display:grid;place-items:center;
+  background:rgba(0,0,0,.68);backdrop-filter:blur(10px);
+  opacity:0;visibility:hidden;pointer-events:none;transition:.28s ease;
+  padding:20px;
+}
+#gameEndOverlay.show{opacity:1;visibility:visible;pointer-events:auto}
+.game-end-card{
+  width:min(420px,92vw);padding:34px 26px 28px;text-align:center;
+  background:rgba(8,8,8,.96);border:1px solid rgba(255,255,255,.2);
+  box-shadow:0 30px 100px rgba(0,0,0,.75)
+}
+.game-end-kicker{font-size:9px;letter-spacing:.3em;opacity:.5;margin-bottom:12px}
+.game-end-title{font-size:clamp(42px,10vw,72px);font-weight:800;line-height:.9;letter-spacing:-.04em}
+.game-end-sub{margin-top:14px;font-size:10px;letter-spacing:.13em;opacity:.68}
+#restartGame{
+  margin-top:24px;padding:12px 24px;background:#fff;color:#000;border:0;
+  font:inherit;font-size:10px;letter-spacing:.18em;font-weight:700;cursor:pointer;
+  transition:transform .2s ease,opacity .2s ease
+}
+#restartGame:hover{transform:translateY(-2px);opacity:.9}
+@media(max-width:600px){
+  .game-end-card{padding:28px 20px 24px}
+  #restartGame{width:100%;padding:13px}
+}
+</style>
+
+<style>
+@media (max-width:600px){
+  html,body{width:100%;min-height:100%;overflow-x:hidden}
+  body.game-focus .stage{
+    width:min(92vw,430px)!important;
+    height:min(92vw,430px)!important;
+    top:59%!important;
+  }
+  body.game-focus .panel{
+    top:4.5vh!important;
+    width:94vw!important;
+  }
+  body.game-focus .turn{
+    font-size:clamp(18px,5vw,24px)!important;
+    white-space:nowrap;
+  }
+  body.game-focus .msg{
+    max-width:92vw!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+    line-height:1.5!important;
+  }
+  .sq{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .piece{font-size:clamp(25px,8vw,46px)!important}
+}
+@media (max-width:380px){
+  body.game-focus .stage{width:94vw!important;height:94vw!important;top:60%!important}
+  body.game-focus .panel{top:3.5vh!important}
+  body.game-focus .turn{font-size:18px!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="particles"></div>
+
+<div class="loader" id="loader">
+  <div>
+    <div class="loaderText">ENTERING THE CHESS DIMENSION</div>
+    <div class="loaderBar"><i></i></div>
+  </div>
+</div>
+
+<div class="mode show" id="mode">
+  <div class="modeBox">
+    <div class="modeEyebrow">PLAY / CHESS</div>
+    <div class="modeTitle">CHOOSE YOUR GAME</div>
+    <button class="modeBtn" id="humanHuman">HUMAN VS HUMAN</button>
+    <button class="modeBtn disabled" id="humanAI">HUMAN VS AI <small>SOON</small></button>
+  </div>
+</div>
+
+<div class="hud">
+  <div class="top"><div class="brand">AR / PLAY</div><div class="nav"><a href="index.html">HOME</a></div></div>
+  <div class="title"><div class="eyebrow">01 / PLAYGROUND</div><h1>THE<br>CHESS<br>DIMENSION.</h1><div class="desc">Think. Move. Adapt.<br>Every move changes the dimension.</div></div>
+  <a class="return" href="index.html">← RETURN TO REALITY</a>
+  <div class="panel"><div class="panelLabel">GAME STATE</div><div class="turn" id="turn">WHITE TO MOVE</div><div class="msg" id="msg">Choose Human vs Human to begin.</div></div>
+  <div class="bottom"><span>CHESS / <b id="moveNo">MOVE 1</b></span><span>CLICK / TAP PIECE → DESTINATION</span></div>
+</div>
+
+<div class="stage" id="stage">
+  <div class="base"></div>
+  <div class="board" id="board"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+const B=document.getElementById("board");
+const mode=document.getElementById("mode");
+const turnEl=document.getElementById("turn");
+const msg=document.getElementById("msg");
+const moveNo=document.getElementById("moveNo");
+const stage=document.getElementById("stage");
+const loader=document.getElementById("loader");
+
+
+function showGameEnd(title,sub){
+  const o=document.getElementById("gameEndOverlay");
+  if(!o)return;
+  document.getElementById("gameEndTitle").textContent=title;
+  document.getElementById("gameEndSub").textContent=sub;
+  o.classList.add("show");
+}
+function hideGameEnd(){
+  const o=document.getElementById("gameEndOverlay");
+  if(o)o.classList.remove("show");
+}
+
+const G={
+ w:{k:"♔",q:"♕",r:"♖",b:"♗",n:"♘",p:"♙"},
+ b:{k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"}
+};
+
+let pos={},side="w",selected=null,legal=[],flipped=false,moves=0;
+let gameStarted=false,lastFrom=null,lastTo=null,animating=false;
+let rights={wK:true,wQ:true,bK:true,bQ:true};
+let ep=null;
+
+const key=(f,r)=>f+"_"+r;
+const parse=s=>({f:Number(s[0]),r:Number(s[2])});
+const inside=(f,r)=>f>=0&&f<8&&r>=0&&r<8;
+const at=(f,r)=>pos[key(f,r)];
+const other=c=>c==="w"?"b":"w";
+
+function resetPosition(){
+ pos={};
+ const back=["r","n","b","q","k","b","n","r"];
+ for(let f=0;f<8;f++){
+   pos[key(f,0)]={c:"w",t:back[f]};
+   pos[key(f,1)]={c:"w",t:"p"};
+   pos[key(f,6)]={c:"b",t:"p"};
+   pos[key(f,7)]={c:"b",t:back[f]};
+ }
+ side="w";selected=null;legal=[];flipped=false;moves=0;
+ lastFrom=null;lastTo=null;animating=false;
+ rights={wK:true,wQ:true,bK:true,bQ:true};
+ ep=null;
+}
+
+/* Pseudo-legal attacks. */
+function attacksFrom(s){
+ const p=pos[s]; if(!p)return [];
+ const {f,r}=parse(s),out=[];
+ const add=(nf,nr)=>{
+   if(inside(nf,nr))out.push(key(nf,nr));
+ };
+ if(p.t==="p"){
+   const d=p.c==="w"?1:-1;
+   add(f-1,r+d); add(f+1,r+d);
+   return out;
+ }
+ if(p.t==="n"){
+   [[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]]
+   .forEach(v=>add(f+v[0],r+v[1]));
+   return out;
+ }
+ if(p.t==="k"){
+   for(let df=-1;df<=1;df++)for(let dr=-1;dr<=1;dr++)
+     if(df||dr)add(f+df,r+dr);
+   return out;
+ }
+ const dirs=[];
+ if(p.t==="b"||p.t==="q")dirs.push([1,1],[1,-1],[-1,1],[-1,-1]);
+ if(p.t==="r"||p.t==="q")dirs.push([1,0],[-1,0],[0,1],[0,-1]);
+ for(const [df,dr] of dirs){
+   let nf=f+df,nr=r+dr;
+   while(inside(nf,nr)){
+     const t=key(nf,nr); out.push(t);
+     if(at(nf,nr))break;
+     nf+=df;nr+=dr;
+   }
+ }
+ return out;
+}
+
+function kingSquare(c){
+ for(const s in pos)if(pos[s].c===c&&pos[s].t==="k")return s;
+ return null;
+}
+
+function isAttacked(square,by){
+ for(const s in pos){
+   if(pos[s].c!==by)continue;
+   if(attacksFrom(s).includes(square))return true;
+ }
+ return false;
+}
+
+function inCheck(c){
+ const k=kingSquare(c);
+ return !k || isAttacked(k,other(c));
+}
+
+function clonePosition(){
+ const b={};
+ for(const s in pos)b[s]={...pos[s]};
+ return b;
+}
+
+function restorePosition(b){
+ pos={};
+ for(const s in b)pos[s]={...b[s]};
+}
+
+/* Generate movement candidates, including castling and en-passant. */
+function pseudoMoves(s){
+ const p=pos[s]; if(!p)return [];
+ const {f,r}=parse(s),out=[];
+ const add=(nf,nr)=>{
+   if(!inside(nf,nr))return;
+   const t=key(nf,nr),q=at(nf,nr);
+   if(!q || q.c!==p.c)out.push(t);
+ };
+ if(p.t==="p"){
+   const d=p.c==="w"?1:-1;
+   const start=p.c==="w"?1:6;
+   if(inside(f,r+d)&&!at(f,r+d)){
+     out.push(key(f,r+d));
+     if(r===start&&!at(f,r+2*d))out.push(key(f,r+2*d));
+   }
+   for(const df of [-1,1]){
+     const nf=f+df,nr=r+d;
+     if(!inside(nf,nr))continue;
+     const t=key(nf,nr),q=at(nf,nr);
+     if(q&&q.c!==p.c&&q.t!=="k")out.push(t);
+     if(ep===t)out.push(t);
+   }
+   return out;
+ }
+ if(p.t==="n"){
+   [[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]]
+   .forEach(v=>add(f+v[0],r+v[1]));
+   return out;
+ }
+ if(p.t==="k"){
+   for(let df=-1;df<=1;df++)for(let dr=-1;dr<=1;dr++)
+     if(df||dr)add(f+df,r+dr);
+
+   const enemy=other(p.c);
+   if(p.c==="w"&&s==="4_0"&&!inCheck("w")){
+     if(rights.wK&&!at(5,0)&&!at(6,0)&&
+        at(7,0)?.c==="w"&&at(7,0)?.t==="r"&&
+        !isAttacked("5_0",enemy)&&!isAttacked("6_0",enemy))out.push("6_0");
+     if(rights.wQ&&!at(1,0)&&!at(2,0)&&!at(3,0)&&
+        at(0,0)?.c==="w"&&at(0,0)?.t==="r"&&
+        !isAttacked("3_0",enemy)&&!isAttacked("2_0",enemy))out.push("2_0");
+   }
+   if(p.c==="b"&&s==="4_7"&&!inCheck("b")){
+     if(rights.bK&&!at(5,7)&&!at(6,7)&&
+        at(7,7)?.c==="b"&&at(7,7)?.t==="r"&&
+        !isAttacked("5_7",enemy)&&!isAttacked("6_7",enemy))out.push("6_7");
+     if(rights.bQ&&!at(1,7)&&!at(2,7)&&!at(3,7)&&
+        at(0,7)?.c==="b"&&at(0,7)?.t==="r"&&
+        !isAttacked("3_7",enemy)&&!isAttacked("2_7",enemy))out.push("2_7");
+   }
+   return out;
+ }
+ const dirs=[];
+ if(p.t==="b"||p.t==="q")dirs.push([1,1],[1,-1],[-1,1],[-1,-1]);
+ if(p.t==="r"||p.t==="q")dirs.push([1,0],[-1,0],[0,1],[0,-1]);
+ for(const [df,dr] of dirs){
+   let nf=f+df,nr=r+dr;
+   while(inside(nf,nr)){
+     const t=key(nf,nr),q=at(nf,nr);
+     if(!q)out.push(t);
+     else{if(q.c!==p.c&&q.t!=="k")out.push(t);break}
+     nf+=df;nr+=dr;
+   }
+ }
+ return out;
+}
+
+function simulate(from,to){
+ const backup=clonePosition();
+ const backupEp=ep;
+
+ const moving={...pos[from]};
+ const target=pos[to];
+ delete pos[from];
+
+ /* En-passant capture. */
+ if(moving.t==="p"&&to===ep&&!target){
+   const {f,r}=parse(to);
+   delete pos[key(f,r+(moving.c==="w"?-1:1))];
+ }
+
+ delete pos[to];
+ pos[to]=moving;
+
+ /* Castling rook. */
+ if(moving.t==="k"&&Math.abs(parse(to).f-parse(from).f)===2){
+   const r=parse(from).r;
+   if(parse(to).f===6){
+     pos["5_"+r]=pos["7_"+r]; delete pos["7_"+r];
+   }else{
+     pos["3_"+r]=pos["0_"+r]; delete pos["0_"+r];
+   }
+ }
+
+ const safe=!inCheck(moving.c);
+ restorePosition(backup); ep=backupEp;
+ return safe;
+}
+
+function legalFrom(s){
+ const p=pos[s]; if(!p||p.c!==side)return [];
+ return pseudoMoves(s).filter(to=>simulate(s,to));
+}
+
+function allLegal(c){
+ const old=side;side=c;
+ const result=[];
+ for(const s in pos){
+   if(pos[s].c!==c)continue;
+   for(const to of legalFrom(s))result.push([s,to]);
+ }
+ side=old;
+ return result;
+}
+
+/* ===== rendering ===== */
+function render(){
+ B.innerHTML="";
+ for(let vr=0;vr<8;vr++){
+   for(let vf=0;vf<8;vf++){
+     const f=flipped?7-vf:vf;
+     const r=flipped?vr:7-vr;
+     const s=key(f,r);
+     const el=document.createElement("button");
+     el.type="button";
+     el.className="sq "+(((f+r)%2===0)?"light":"dark");
+     el.dataset.square=s;
+     if(s===selected)el.classList.add("selected");
+     if(legal.includes(s))el.classList.add(pos[s]?"capture":"legal");
+     if(s===lastFrom||s===lastTo)el.classList.add("last");
+
+     const p=pos[s];
+     if(p){
+       const piece=document.createElement("div");
+       piece.className="piece "+(p.c==="w"?"white":"black");
+       const span=document.createElement("span");
+       span.className="symbol";
+       span.textContent=G[p.c][p.t];
+       piece.appendChild(span);
+       el.appendChild(piece);
+     }
+     el.addEventListener("click",()=>clickSquare(s));
+     B.appendChild(el);
+   }
+ }
+ turnEl.textContent=gameStarted
+   ? (side==="w"?"WHITE":"BLACK")+" TO MOVE"
+   : "CHOOSE GAME";
+ moveNo.textContent="MOVE "+(moves+1);
+}
+
+function clickSquare(s){
+ if(!gameStarted||animating)return;
+ const p=pos[s];
+
+ if(selected){
+   if(legal.includes(s)){
+     animateAndMove(selected,s);
+     return;
+   }
+   if(p&&p.c===side){select(s);return}
+   selected=null;legal=[];render();
+   msg.textContent="SELECT A PIECE TO CONTINUE.";
+   return;
+ }
+ if(p&&p.c===side)select(s);
+ else msg.textContent="SELECT YOUR "+(side==="w"?"WHITE":"BLACK")+" PIECE.";
+}
+
+function select(s){
+ selected=s;
+ legal=legalFrom(s);
+ render();
+ msg.textContent=legal.length
+   ? legal.length+" LEGAL MOVE"+(legal.length===1?"":"S")+" — CHOOSE A SQUARE"
+   : "NO LEGAL MOVES — CHOOSE A SQUARE";
+}
+
+/* Small popup, created only when needed; cannot interfere with loading. */
+function popup(title,sub,final=false){
+ let p=document.getElementById("chessPopup");
+ if(!p){
+   p=document.createElement("div");
+   p.id="chessPopup";
+   p.style.cssText="position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:rgba(0,0,0,.62);backdrop-filter:blur(9px);opacity:0;transition:.25s;pointer-events:none";
+   p.innerHTML='<div style="width:min(390px,86vw);padding:30px;text-align:center;background:#090909;border:1px solid rgba(255,255,255,.25);box-shadow:0 25px 80px #000"><div id="cpK" style="font-size:9px;letter-spacing:.28em;opacity:.5;margin-bottom:12px">CHESS ALERT</div><div id="cpT" style="font-size:clamp(38px,9vw,64px);font-weight:800;line-height:1">CHECK</div><div id="cpS" style="margin-top:12px;font-size:10px;letter-spacing:.12em;opacity:.65"></div><button id="cpB" style="margin-top:22px;padding:10px 18px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25);font-size:9px;letter-spacing:.15em;cursor:pointer">CONTINUE</button></div>';
+   document.body.appendChild(p);
+   p.querySelector("#cpB").onclick=()=>{p.style.opacity="0";p.style.pointerEvents="none"};
+ }
+ p.querySelector("#cpK").textContent=final?"GAME OVER":"CHESS ALERT";
+ p.querySelector("#cpT").textContent=title;
+ p.querySelector("#cpS").textContent=sub;
+ p.querySelector("#cpB").style.display=final?"none":"inline-block";
+ p.style.opacity="1";p.style.pointerEvents="auto";
+}
+
+function makeMove(from,to){
+ if(!pos[from]){animating=false;return}
+
+ const moving={...pos[from]};
+ const target=pos[to];
+ const pf=parse(from),pt=parse(to);
+
+ /* En-passant capture. */
+ if(moving.t==="p"&&to===ep&&!target){
+   delete pos[key(pt.f,pt.r+(moving.c==="w"?-1:1))];
+ }
+
+ delete pos[from];
+ delete pos[to];
+ pos[to]=moving;
+
+ /* Castling. */
+ if(moving.t==="k"&&Math.abs(pt.f-pf.f)===2){
+   if(pt.f===6){
+     pos[key(5,pf.r)]=pos[key(7,pf.r)];
+     delete pos[key(7,pf.r)];
+   }else{
+     pos[key(3,pf.r)]=pos[key(0,pf.r)];
+     delete pos[key(0,pf.r)];
+   }
+ }
+ if(moving.t==="k"){
+   rights[moving.c+"K"]=false; rights[moving.c+"Q"]=false;
+ }
+ if(moving.t==="r"){
+   if(from==="0_0")rights.wQ=false;
+   if(from==="7_0")rights.wK=false;
+   if(from==="0_7")rights.bQ=false;
+   if(from==="7_7")rights.bK=false;
+ }
+ if(target?.t==="r"){
+   if(to==="0_0")rights.wQ=false;
+   if(to==="7_0")rights.wK=false;
+   if(to==="0_7")rights.bQ=false;
+   if(to==="7_7")rights.bK=false;
+ }
+
+ /* En-passant target is valid for one reply only. */
+ ep=null;
+ if(moving.t==="p"&&Math.abs(pt.r-pf.r)===2){
+   ep=key(pf.f,(pf.r+pt.r)/2);
+ }
+
+ /* Promotion: automatic queen, no extra modal needed. */
+ if(moving.t==="p"&&(pt.r===0||pt.r===7))moving.t="q";
+
+ lastFrom=from;lastTo=to;
+ moves++;
+ side=other(side);
+
+ /* The active player automatically gets their perspective. */
+ flipped=(side==="b");
+ selected=null;legal=[];
+ animating=false;
+ render();
+
+ const replies=allLegal(side);
+ const check=inCheck(side);
+
+ if(replies.length===0){
+   gameStarted=false;
+   if(check){
+     const winner=side==="w"?"BLACK":"WHITE";
+     turnEl.textContent=winner+" WINS";
+     msg.textContent="CHECKMATE — "+winner+" WINS.";
+     showGameEnd("CHECKMATE",winner+" WINS");
+   }else{
+     turnEl.textContent="DRAW";
+     msg.textContent="STALEMATE — DRAW.";
+     showGameEnd("DRAW","STALEMATE — NO LEGAL MOVES REMAIN");
+   }
+ }else if(check){
+   msg.textContent=(side==="w"?"WHITE":"BLACK")+" IS IN CHECK.";
+   popup("CHECK",(side==="w"?"WHITE":"BLACK")+" KING IS UNDER ATTACK");
+ }else{
+   msg.textContent="SELECT A PIECE TO CONTINUE.";
+ }
+}
+
+function animateAndMove(from,to){
+ if(animating)return;
+ animating=true;
+ const source=[...B.querySelectorAll(".sq")].find(x=>x.dataset.square===from);
+ const piece=source?.querySelector(".piece");
+ if(piece){
+   piece.classList.add("hop");
+   setTimeout(()=>makeMove(from,to),500);
+ }else{
+   makeMove(from,to);
+ }
+}
+
+function newGame(){
+ hideGameEnd();
+ resetPosition();
+ gameStarted=true;
+ render();
+ msg.textContent="HUMAN VS HUMAN — WHITE TO MOVE.";
+}
+
+document.getElementById("humanHuman").addEventListener("click",()=>{
+ newGame();
+ mode.classList.remove("show");
+ document.body.classList.add("game-focus");
+ render();
+});
+
+document.getElementById("humanAI").addEventListener("click",e=>e.preventDefault());
+
+/* Deliberately no NEW GAME or FLIP BOARD controls. */
+
+resetPosition();
+render();
+
+setTimeout(()=>loader.classList.add("off"),850);
+
+/* particles */
+const particleLayer=document.getElementById("particles");
+for(let i=0;i<90;i++){
+ const d=document.createElement("i");
+ d.className="dot";
+ d.style.left=Math.random()*100+"%";
+ d.style.top=(30+Math.random()*70)+"%";
+ d.style.animationDuration=(5+Math.random()*9)+"s";
+ d.style.animationDelay=(-Math.random()*10)+"s";
+ d.style.setProperty("--x",(Math.random()*70-35)+"px");
+ particleLayer.appendChild(d);
+}
+
+/* desktop parallax */
+let tx=0,ty=0;
+window.addEventListener("pointermove",e=>{
+ if(innerWidth<=800)return;
+ tx=e.clientX/innerWidth-.5;
+ ty=e.clientY/innerHeight-.5;
+});
+function loop(){
+ if(innerWidth>800){
+   stage.style.transform=`translate(-50%,-50%) perspective(1100px) rotateX(${54+ty*3}deg) rotateZ(${-2+tx*3}deg)`;
+ }
+ requestAnimationFrame(loop);
+}
+loop();
+})();
+</script>
+
+<div id="gameEndOverlay" aria-live="assertive">
+  <div class="game-end-card">
+    <div class="game-end-kicker" id="gameEndKicker">GAME OVER</div>
+    <div class="game-end-title" id="gameEndTitle">DRAW</div>
+    <div class="game-end-sub" id="gameEndSub">STALEMATE</div>
+    <button id="restartGame">RESTART GAME</button>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+ const b=document.getElementById("restartGame");
+ if(b)b.addEventListener("click",()=>{
+   hideGameEnd();
+   if(typeof newGame==="function")newGame();
+ });
+});
+</script>
+</body>
+</html>
