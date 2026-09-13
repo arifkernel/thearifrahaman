@@ -1,1 +1,2263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>SGPA & CGPA Calculator — Arif Rahaman</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    margin:0;
+    background:#050a10;
+    color:#f4f1e9;
+    font-family:"DM Mono",monospace;
+    overflow-x:hidden;
+}
+
+/* =========================
+   BACKGROUND
+========================= */
+
+#background{
+    position:fixed;
+    inset:0;
+    z-index:-5;
+    overflow:hidden;
+}
+
+#background img{
+    width:104%;
+    height:104%;
+    object-fit:cover;
+    object-position:center;
+    filter:brightness(.52) contrast(1.08) saturate(.85);
+    transform:scale(1.03);
+}
+
+.background-dark{
+    position:absolute;
+    inset:0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(3,8,14,.82),
+            rgba(3,8,14,.42) 50%,
+            rgba(3,8,14,.72)
+        ),
+        linear-gradient(
+            0deg,
+            rgba(3,8,14,.92),
+            transparent 45%,
+            rgba(3,8,14,.35)
+        );
+}
+
+/* =========================
+   CURSOR
+========================= */
+
+.cursor{
+    position:fixed;
+    width:20px;
+    height:20px;
+    border:1px solid white;
+    border-radius:50%;
+
+    pointer-events:none;
+    z-index:100;
+
+    transform:translate(-50%,-50%);
+
+    mix-blend-mode:difference;
+
+    transition:
+        width .25s ease,
+        height .25s ease;
+}
+
+.cursor.active{
+    width:50px;
+    height:50px;
+}
+
+/* =========================
+   PROGRESS
+========================= */
+
+.progress{
+    position:fixed;
+    top:0;
+    left:0;
+
+    width:100%;
+    height:2px;
+
+    background:white;
+
+    transform-origin:left;
+    transform:scaleX(0);
+
+    z-index:90;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    width:100%;
+
+    padding:
+        15px
+        4vw;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    z-index:20;
+}
+
+.logo img{
+    width:42px;
+    height:32px;
+    object-fit:contain;
+}
+
+.navigation{
+    display:flex;
+    gap:38px;
+}
+
+.navigation a{
+    color:white;
+    text-decoration:none;
+
+    font-size:11px;
+    letter-spacing:.16em;
+
+    position:relative;
+}
+
+.navigation a::after{
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    bottom:-6px;
+
+    width:0;
+    height:1px;
+
+    background:white;
+
+    transition:.3s;
+}
+
+.navigation a:hover::after{
+    width:100%;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+    min-height:100svh;
+
+    padding:
+        0
+        5vw;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+
+    position:relative;
+}
+
+.hero-content{
+    margin-top:-4vh;
+}
+
+.eyebrow{
+    font-size:11px;
+    letter-spacing:.25em;
+
+    margin-bottom:30px;
+}
+
+.hero-title{
+    font-family:"Playfair Display",serif;
+
+    font-weight:500;
+
+    font-size:
+        clamp(
+            52px,
+            6.2vw,
+            92px
+        );
+
+    line-height:.88;
+
+    letter-spacing:-.05em;
+
+    margin:0;
+}
+
+.hero-description{
+    margin-top:30px;
+
+    font-size:10px;
+
+    letter-spacing:.12em;
+
+    line-height:1.8;
+
+    max-width:760px;
+}
+
+/* =========================
+   SCROLL INDICATOR
+========================= */
+
+.scroll-area{
+    position:absolute;
+
+    left:3.1vw;
+    bottom:5vh;
+
+    display:flex;
+    flex-direction:column;
+
+    align-items:center;
+
+    color:white;
+
+    text-decoration:none;
+}
+
+.scroll-circle{
+    width:52px;
+    height:52px;
+
+    border:1px solid #ffffffaa;
+
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    position:relative;
+}
+
+.scroll-circle::after{
+    content:"";
+
+    width:6px;
+    height:6px;
+
+    background:white;
+
+    border-radius:50%;
+}
+
+.scroll-line{
+    width:1px;
+    height:120px;
+
+    background:#ffffffaa;
+
+    margin-top:0;
+}
+
+.scroll-text{
+    font-size:10px;
+
+    letter-spacing:.18em;
+
+    line-height:1.8;
+
+    margin-top:12px;
+
+    text-align:center;
+}
+
+.scroll-arrow{
+    font-size:23px;
+
+    margin-top:5px;
+
+    animation:
+        arrowMove
+        1.8s
+        infinite
+        ease-in-out;
+}
+
+@keyframes arrowMove{
+
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(7px);
+    }
+
+}
+
+/* =========================
+   SIDE TEXT
+========================= */
+
+.side-text{
+    position:absolute;
+
+    right:2.5vw;
+    bottom:7vh;
+
+    writing-mode:vertical-rl;
+
+    transform:rotate(180deg);
+
+    font-size:8px;
+
+    letter-spacing:.27em;
+
+    opacity:.7;
+}
+
+/* =========================
+   CALCULATOR SECTION
+========================= */
+
+.calculator-section{
+
+    min-height:100svh;
+
+    padding:
+        8vh
+        5.7vw
+        10vh;
+
+    position:relative;
+}
+
+.section-line{
+    width:100%;
+
+    height:1px;
+
+    background:#ffffff35;
+
+    margin-bottom:40px;
+}
+
+.calculator-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        .9fr
+        1.1fr;
+
+    gap:6vw;
+
+    align-items:start;
+}
+
+/* LEFT SIDE */
+
+.section-number{
+    font-size:9px;
+
+    letter-spacing:.2em;
+
+    opacity:.7;
+}
+
+.section-title{
+    font-family:"Playfair Display",serif;
+
+    font-weight:500;
+
+    font-size:
+        clamp(
+            42px,
+            4.8vw,
+            72px
+        );
+
+    line-height:.9;
+
+    letter-spacing:-.05em;
+
+    margin:
+        20px 0
+        25px;
+}
+
+.section-description{
+    font-size:10px;
+
+    line-height:1.9;
+
+    letter-spacing:.06em;
+
+    color:#c3c5c4;
+
+    max-width:550px;
+}
+
+/* =========================
+   TABS
+========================= */
+
+.tabs{
+
+    display:flex;
+
+    gap:22px;
+
+    border-bottom:
+        1px solid
+        #ffffff35;
+
+    margin-bottom:20px;
+}
+
+.tab{
+
+    background:none;
+
+    border:0;
+
+    color:#888;
+
+    font-family:"DM Mono",monospace;
+
+    font-size:9px;
+
+    letter-spacing:.16em;
+
+    padding:
+        0
+        0
+        12px;
+
+    cursor:pointer;
+
+    border-bottom:
+        1px solid
+        transparent;
+}
+
+.tab.active{
+
+    color:white;
+
+    border-bottom-color:white;
+}
+
+/* =========================
+   SUBJECT TABLE
+========================= */
+
+.subject-header,
+.subject-row{
+
+    display:grid;
+
+    grid-template-columns:
+        minmax(130px,1.8fr)
+        80px
+        100px
+        90px
+        30px;
+
+    gap:9px;
+
+    align-items:center;
+}
+
+.subject-header{
+
+    font-size:8px;
+
+    color:#888;
+
+    letter-spacing:.13em;
+
+    padding:
+        0
+        4px
+        10px;
+
+    text-transform:uppercase;
+}
+
+.subject-row{
+
+    padding:
+        8px 0;
+
+    border-top:
+        1px solid
+        #ffffff22;
+
+    animation:
+        rowAppear
+        .5s
+        ease both;
+}
+
+@keyframes rowAppear{
+
+    from{
+        opacity:0;
+        transform:translateY(8px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+input,
+select{
+
+    width:100%;
+
+    height:41px;
+
+    background:#071019aa;
+
+    border:
+        1px solid
+        #ffffff30;
+
+    border-radius:0;
+
+    color:white;
+
+    padding:
+        8px 10px;
+
+    font-family:"DM Mono",monospace;
+
+    font-size:10px;
+
+    outline:none;
+}
+
+input:focus,
+select:focus{
+
+    border-color:white;
+
+    background:#071019dd;
+}
+
+select option{
+
+    background:#071019;
+
+    color:white;
+}
+
+.remove{
+
+    height:41px;
+
+    border:0;
+
+    background:none;
+
+    color:#aaa;
+
+    font-size:18px;
+
+    cursor:pointer;
+}
+
+.remove:hover{
+    color:white;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.actions{
+
+    display:flex;
+
+    gap:14px;
+
+    flex-wrap:wrap;
+
+    margin-top:18px;
+}
+
+.action{
+
+    padding:
+        11px
+        14px;
+
+    border:
+        1px solid
+        #ffffff45;
+
+    background:transparent;
+
+    color:white;
+
+    font-family:"DM Mono",monospace;
+
+    font-size:8px;
+
+    letter-spacing:.13em;
+
+    cursor:pointer;
+
+    transition:.3s;
+}
+
+.action:hover{
+
+    border-color:white;
+
+    background:#ffffff10;
+}
+
+.action.primary{
+
+    background:#f4f1e9;
+
+    color:#071019;
+
+    border-color:#f4f1e9;
+}
+
+/* =========================
+   RESULTS
+========================= */
+
+.results{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:12px;
+
+    margin-top:28px;
+}
+
+.result{
+
+    border-top:
+        1px solid
+        #ffffff45;
+
+    padding:
+        14px
+        4px
+        0;
+}
+
+.result-label{
+
+    font-size:7px;
+
+    color:#888;
+
+    letter-spacing:.14em;
+}
+
+.result-value{
+
+    font-family:"Playfair Display",serif;
+
+    font-size:38px;
+
+    margin-top:7px;
+}
+
+/* =========================
+   CGPA
+========================= */
+
+.cgpa-row{
+
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        100px
+        100px
+        30px;
+
+    gap:9px;
+
+    align-items:center;
+
+    padding:8px 0;
+
+    border-top:
+        1px solid
+        #ffffff22;
+}
+
+.cgpa-header{
+
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        100px
+        100px
+        30px;
+
+    gap:9px;
+
+    font-size:8px;
+
+    color:#888;
+
+    letter-spacing:.13em;
+
+    padding:
+        0
+        4px
+        10px;
+}
+
+.cgpa-note{
+
+    color:#999;
+
+    font-size:8px;
+
+    line-height:1.8;
+
+    margin-top:20px;
+}
+
+/* =========================
+   HIDDEN
+========================= */
+
+.hidden{
+    display:none;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.bottom-meta{
+
+    margin-top:8vh;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    font-size:8px;
+
+    letter-spacing:.15em;
+
+    color:#777;
+}
+
+/* =========================
+   MOBILE — OPTIMIZED
+========================= */
+
+@media(max-width:800px){
+
+    .cursor{
+        display:none;
+    }
+
+    .header{
+        padding:14px 6vw;
+    }
+
+    .logo img{
+        width:38px;
+        height:30px;
+    }
+
+    .navigation{
+        gap:18px;
+    }
+
+    .navigation a{
+        font-size:9px;
+        letter-spacing:.12em;
+    }
+
+    .hero{
+        min-height:100svh;
+        padding:0 7vw;
+    }
+
+    .hero-content{
+        margin-top:-8vh;
+        max-width:100%;
+    }
+
+    .eyebrow{
+        font-size:8px;
+        letter-spacing:.18em;
+        margin-bottom:20px;
+    }
+
+    .hero-title{
+        font-size:14vw;
+        line-height:.9;
+        letter-spacing:-.055em;
+    }
+
+    .hero-description{
+        margin-top:22px;
+        max-width:330px;
+        font-size:8px;
+        line-height:1.8;
+        letter-spacing:.1em;
+    }
+
+    .scroll-area{
+        left:7vw;
+        bottom:4vh;
+    }
+
+    .scroll-circle{
+        width:42px;
+        height:42px;
+    }
+
+    .scroll-line{
+        height:65px;
+    }
+
+    .scroll-text{
+        font-size:8px;
+        line-height:1.6;
+        margin-top:9px;
+    }
+
+    .scroll-arrow{
+        font-size:19px;
+    }
+
+    .side-text{
+        display:none;
+    }
+
+    .calculator-section{
+        min-height:auto;
+        padding:7vh 7vw 9vh;
+    }
+
+    .section-line{
+        margin-bottom:30px;
+    }
+
+    .calculator-grid{
+        grid-template-columns:1fr;
+        gap:8vh;
+    }
+
+    .section-number{
+        font-size:8px;
+    }
+
+    .section-title{
+        font-size:15vw;
+        line-height:.9;
+        margin:16px 0 20px;
+    }
+
+    .section-description{
+        font-size:8px;
+        line-height:1.85;
+        max-width:100%;
+    }
+
+    .tabs{
+        gap:24px;
+        margin-bottom:18px;
+    }
+
+    .tab{
+        font-size:9px;
+        padding:0 0 10px;
+    }
+
+    .subject-header,
+    .cgpa-header{
+        display:none;
+    }
+
+    .subject-row{
+        grid-template-columns:1fr 1fr 40px;
+        gap:8px;
+        padding:10px 0;
+    }
+
+    .subject-row input:first-child{
+        grid-column:1/-1;
+    }
+
+    .subject-row select{
+        grid-column:1/3;
+    }
+
+    .subject-row input,
+    .subject-row select,
+    .remove{
+        height:44px;
+    }
+
+    input,select{
+        font-size:10px;
+        padding:9px 10px;
+    }
+
+    .remove{
+        font-size:20px;
+    }
+
+    .actions{
+        gap:9px;
+        margin-top:16px;
+    }
+
+    .action{
+        min-height:42px;
+        padding:11px 12px;
+        font-size:7.5px;
+    }
+
+    .results{
+        grid-template-columns:1fr 1fr;
+        gap:18px 12px;
+        margin-top:25px;
+    }
+
+    .result{
+        padding:12px 3px 0;
+    }
+
+    .result-label{
+        font-size:6.5px;
+        line-height:1.5;
+    }
+
+    .result-value{
+        font-size:32px;
+        margin-top:6px;
+    }
+
+    .cgpa-row{
+        grid-template-columns:1fr 1fr 40px;
+        gap:8px;
+        padding:10px 0;
+    }
+
+    .cgpa-row input:first-child{
+        grid-column:1/-1;
+    }
+
+    .cgpa-row input,
+    .cgpa-row .remove{
+        height:44px;
+    }
+
+    .cgpa-note{
+        font-size:7px;
+        line-height:1.8;
+        margin-top:18px;
+    }
+
+    .bottom-meta{
+        margin-top:7vh;
+        flex-direction:column;
+        gap:12px;
+        font-size:7px;
+        line-height:1.7;
+    }
+}
+
+@media(max-width:380px){
+
+    .navigation{
+        gap:12px;
+    }
+
+    .navigation a{
+        font-size:8px;
+    }
+
+    .hero-title,
+    .section-title{
+        font-size:15.5vw;
+    }
+
+    .results{
+        grid-template-columns:1fr;
+        gap:14px;
+    }
+
+    .result-value{
+        font-size:30px;
+    }
+}
+
+/* =========================
+   LOADING SCREEN — ADDED ONLY
+========================= */
+
+#site-loader{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    background:#050a10;
+    color:#f4f1e9;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:opacity .8s ease, visibility .8s ease;
+}
+
+#site-loader.loader-hidden{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}
+
+.loader-inner{
+    width:min(360px,72vw);
+}
+
+.loader-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:9px;
+    letter-spacing:.22em;
+    margin-bottom:12px;
+    opacity:.85;
+}
+
+.loader-bar{
+    width:100%;
+    height:1px;
+    background:#ffffff30;
+    overflow:hidden;
+}
+
+.loader-bar-fill{
+    width:0;
+    height:100%;
+    background:#f4f1e9;
+    animation:loaderFill 1.35s cubic-bezier(.65,0,.35,1) forwards;
+}
+
+@keyframes loaderFill{
+    from{width:0}
+    to{width:100%}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     LOADING SCREEN — ADDED ONLY
+========================= -->
+<div id="site-loader" aria-hidden="true">
+    <div class="loader-inner">
+        <div class="loader-meta">
+            <span>AR / TOOL</span>
+            <span id="loader-percent">00</span>
+        </div>
+        <div class="loader-bar">
+            <div class="loader-bar-fill"></div>
+        </div>
+    </div>
+</div>
+
+
+<!-- =========================
+     BACKGROUND
+========================= -->
+
+<div id="background">
+
+    <img
+        src="assets/arif-hero.jpg"
+        alt=""
+    >
+
+    <div class="background-dark"></div>
+
+</div>
+
+<div class="progress"></div>
+
+<div class="cursor"></div>
+
+
+<!-- =========================
+     MAIN
+========================= -->
+
+<main>
+
+<!-- =========================
+     SCREEN 1
+========================= -->
+
+<section class="hero">
+
+    <header class="header">
+
+        <a
+            class="logo"
+            href="index.html"
+        >
+
+            <img
+                src="assets/ar-monogram.png"
+                alt="AR"
+            >
+
+        </a>
+
+
+        <nav class="navigation">
+
+            <a href="index.html">
+                HOME
+            </a>
+
+            <a href="#calculator">
+                CALCULATOR
+            </a>
+
+        </nav>
+
+    </header>
+
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+            A SMALL TOOL / BUILT TO BE USEFUL
+        </div>
+
+
+        <h1 class="hero-title">
+
+            SGPA &amp; CGPA
+            <br>
+
+            CALCULATOR.
+
+        </h1>
+
+
+        <p class="hero-description">
+
+            ENTER YOUR MARKS, CREDITS AND SEMESTER RESULTS.
+            LET THE NUMBERS DO THE WORK.
+
+        </p>
+
+    </div>
+
+
+    <!-- SCROLL -->
+
+    <a
+        href="#calculator"
+        class="scroll-area"
+    >
+
+        <div class="scroll-circle"></div>
+
+        <div class="scroll-line"></div>
+
+        <div class="scroll-text">
+
+            SCROLL DOWN
+            <br>
+
+            TO CALCULATE
+
+        </div>
+
+        <div class="scroll-arrow">
+            ↓
+        </div>
+
+    </a>
+
+
+    <div class="side-text">
+
+        CALCULATE / LEARN / IMPROVE
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================
+     SCREEN 2
+========================= -->
+
+<section
+    class="calculator-section"
+    id="calculator"
+>
+
+    <div class="section-line"></div>
+
+
+    <div class="calculator-grid">
+
+
+        <!-- LEFT -->
+
+        <div>
+
+            <div class="section-number">
+
+                01 / SGPA
+
+            </div>
+
+
+            <h2 class="section-title">
+
+                CALCULATE
+                <br>
+
+                THIS SEMESTER.
+
+            </h2>
+
+
+            <p class="section-description">
+
+                Add your subjects, enter credits and marks
+                out of 100. The calculator assigns the
+                grade point and calculates a credit-weighted SGPA.
+
+            </p>
+
+        </div>
+
+
+
+        <!-- RIGHT -->
+
+        <div class="calculator">
+
+
+            <!-- TABS -->
+
+            <div class="tabs">
+
+                <button
+                    class="tab active"
+                    id="sgpaTab"
+                    type="button"
+                >
+                    SGPA
+                </button>
+
+
+                <button
+                    class="tab"
+                    id="cgpaTab"
+                    type="button"
+                >
+                    CGPA
+                </button>
+
+            </div>
+
+
+
+            <!-- =====================
+                 SGPA
+            ====================== -->
+
+            <div id="sgpaPanel">
+
+
+                <div class="subject-header">
+
+                    <span>SUBJECT</span>
+                    <span>CREDITS</span>
+                    <span>MARKS</span>
+                    <span>GRADE</span>
+                    <span></span>
+
+                </div>
+
+
+                <div id="subjects"></div>
+
+
+                <div class="actions">
+
+                    <button
+                        class="action"
+                        id="addSubject"
+                        type="button"
+                    >
+
+                        + ADD SUBJECT
+
+                    </button>
+
+
+                    <button
+                        class="action primary"
+                        id="calculateSgpa"
+                        type="button"
+                    >
+
+                        CALCULATE SGPA
+
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="error"
+                    id="sgpaError"
+                ></div>
+
+
+                <div class="results">
+
+
+                    <div class="result">
+
+                        <div class="result-label">
+                            TOTAL MARKS
+                        </div>
+
+                        <div
+                            class="result-value"
+                            id="totalMarks"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="result">
+
+                        <div class="result-label">
+                            PERCENTAGE
+                        </div>
+
+                        <div
+                            class="result-value"
+                            id="percentage"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="result">
+
+                        <div class="result-label">
+                            CREDITS
+                        </div>
+
+                        <div
+                            class="result-value"
+                            id="totalCredits"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="result">
+
+                        <div class="result-label">
+                            SGPA
+                        </div>
+
+                        <div
+                            class="result-value"
+                            id="sgpa"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <p class="cgpa-note">
+
+                    Grade scale:
+                    O 10 • A+ 9 • A 8 • B+ 7 •
+                    B 6 • C 5 • P 4 • F 0.
+
+                </p>
+
+            </div>
+
+
+
+            <!-- =====================
+                 CGPA
+            ====================== -->
+
+            <div
+                id="cgpaPanel"
+                class="hidden"
+            >
+
+                <div class="cgpa-header">
+
+                    <span>SEMESTER</span>
+                    <span>CREDITS</span>
+                    <span>SGPA</span>
+                    <span></span>
+
+                </div>
+
+
+                <div id="semesters"></div>
+
+
+                <div class="actions">
+
+                    <button
+                        class="action"
+                        id="addSemester"
+                        type="button"
+                    >
+
+                        + ADD SEMESTER
+
+                    </button>
+
+
+                    <button
+                        class="action primary"
+                        id="calculateCgpa"
+                        type="button"
+                    >
+
+                        CALCULATE CGPA
+
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="error"
+                    id="cgpaError"
+                ></div>
+
+
+                <div
+                    class="results"
+                    style="grid-template-columns:1fr 1fr"
+                >
+
+                    <div class="result">
+
+                        <div class="result-label">
+                            TOTAL CREDITS
+                        </div>
+
+                        <div
+                            class="result-value"
+                            id="cgpaCredits"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="result">
+
+                        <div class="result-label">
+                            CURRENT CGPA
+                        </div>
+
+                        <div
+                            class="result-value"
+                            id="cgpa"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <p class="cgpa-note">
+
+                    CGPA is calculated using the
+                    credit-weighted average of semester SGPA values.
+
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <div class="bottom-meta">
+
+        <span>
+            AR / 01
+        </span>
+
+        <span>
+            TURNING CODE INTO USEFUL THINGS.
+        </span>
+
+    </div>
+
+</section>
+
+</main>
+
+
+
+<script>
+
+/* =========================
+   LOADING SCREEN — ADDED ONLY
+========================= */
+
+(function(){
+    const loader = document.getElementById("site-loader");
+    const percent = document.getElementById("loader-percent");
+    if(!loader) return;
+
+    let value = 0;
+    const timer = setInterval(function(){
+        value += Math.floor(Math.random() * 9) + 4;
+        if(value >= 100){
+            value = 100;
+            clearInterval(timer);
+        }
+        if(percent){
+            percent.textContent = String(value).padStart(2,"0");
+        }
+    }, 70);
+
+    window.addEventListener("load", function(){
+        setTimeout(function(){
+            loader.classList.add("loader-hidden");
+        }, 1450);
+    });
+})();
+
+
+/* =========================
+   CURSOR
+========================= */
+
+const cursor =
+    document.querySelector(".cursor");
+
+
+if(
+    window.matchMedia(
+        "(pointer:fine)"
+    ).matches
+){
+
+    document.addEventListener(
+        "mousemove",
+        function(e){
+
+            cursor.style.left =
+                e.clientX + "px";
+
+            cursor.style.top =
+                e.clientY + "px";
+
+        }
+    );
+
+
+    document
+        .querySelectorAll("a,button")
+        .forEach(function(element){
+
+            element.addEventListener(
+                "mouseenter",
+                function(){
+
+                    cursor.classList.add("active");
+
+                }
+            );
+
+
+            element.addEventListener(
+                "mouseleave",
+                function(){
+
+                    cursor.classList.remove("active");
+
+                }
+            );
+
+        });
+
+}
+
+
+/* =========================
+   SCROLL PROGRESS
+========================= */
+
+window.addEventListener(
+    "scroll",
+    function(){
+
+        const max =
+            document.documentElement.scrollHeight
+            - window.innerHeight;
+
+        const progress =
+            max > 0
+            ? window.scrollY / max
+            : 0;
+
+        document
+            .querySelector(".progress")
+            .style.transform =
+            `scaleX(${progress})`;
+
+    }
+);
+
+
+
+/* =========================
+   GRADE SCALE
+========================= */
+
+function gradePoint(marks){
+
+    if(marks >= 90)
+        return ["O",10];
+
+    if(marks >= 80)
+        return ["A+",9];
+
+    if(marks >= 70)
+        return ["A",8];
+
+    if(marks >= 60)
+        return ["B+",7];
+
+    if(marks >= 55)
+        return ["B",6];
+
+    if(marks >= 50)
+        return ["C",5];
+
+    if(marks >= 40)
+        return ["P",4];
+
+    return ["F",0];
+
+}
+
+
+
+/* =========================
+   SUBJECT
+========================= */
+
+const subjects =
+    document.getElementById("subjects");
+
+
+function addSubject(){
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "subject-row";
+
+
+    row.innerHTML = `
+
+        <input
+            type="text"
+            placeholder="Subject name"
+        >
+
+        <input
+            type="number"
+            min="1"
+            step="0.5"
+            placeholder="Credits"
+        >
+
+        <input
+            class="marks"
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            placeholder="0–100"
+        >
+
+        <select class="grade">
+
+            <option value="">
+                —
+            </option>
+
+            <option value="10">
+                O
+            </option>
+
+            <option value="9">
+                A+
+            </option>
+
+            <option value="8">
+                A
+            </option>
+
+            <option value="7">
+                B+
+            </option>
+
+            <option value="6">
+                B
+            </option>
+
+            <option value="5">
+                C
+            </option>
+
+            <option value="4">
+                P
+            </option>
+
+            <option value="0">
+                F
+            </option>
+
+        </select>
+
+
+        <button
+            class="remove"
+            type="button"
+        >
+
+            ×
+
+        </button>
+
+    `;
+
+
+    const marks =
+        row.querySelector(".marks");
+
+
+    const grade =
+        row.querySelector(".grade");
+
+
+    marks.addEventListener(
+        "input",
+        function(){
+
+            const value =
+                Number(marks.value);
+
+
+            if(
+                Number.isFinite(value)
+                &&
+                value >= 0
+                &&
+                value <= 100
+            ){
+
+                grade.value =
+                    gradePoint(value)[1];
+
+            }else{
+
+                grade.value = "";
+
+            }
+
+        }
+    );
+
+
+    row
+        .querySelector(".remove")
+        .addEventListener(
+            "click",
+            function(){
+
+                row.remove();
+
+            }
+        );
+
+
+    subjects.appendChild(row);
+
+}
+
+
+
+/* =========================
+   SEMESTER
+========================= */
+
+const semesters =
+    document.getElementById("semesters");
+
+
+function addSemester(){
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "cgpa-row";
+
+
+    row.innerHTML = `
+
+        <input
+            type="text"
+            placeholder="Semester ${semesters.children.length + 1}"
+        >
+
+        <input
+            type="number"
+            min="1"
+            step="0.5"
+            placeholder="Credits"
+        >
+
+        <input
+            type="number"
+            min="0"
+            max="10"
+            step="0.01"
+            placeholder="SGPA"
+        >
+
+        <button
+            class="remove"
+            type="button"
+        >
+
+            ×
+
+        </button>
+
+    `;
+
+
+    row
+        .querySelector(".remove")
+        .addEventListener(
+            "click",
+            function(){
+
+                row.remove();
+
+            }
+        );
+
+
+    semesters.appendChild(row);
+
+}
+
+
+
+/* INITIAL ROWS */
+
+addSubject();
+
+addSemester();
+
+
+
+/* =========================
+   ADD SUBJECT
+========================= */
+
+document
+    .getElementById("addSubject")
+    .addEventListener(
+        "click",
+        addSubject
+    );
+
+
+
+/* =========================
+   CALCULATE SGPA
+========================= */
+
+document
+    .getElementById("calculateSgpa")
+    .addEventListener(
+        "click",
+        function(){
+
+            let totalCredits = 0;
+
+            let totalPoints = 0;
+
+            let totalMarks = 0;
+
+            let count = 0;
+
+
+            document
+                .querySelectorAll(
+                    "#subjects .subject-row"
+                )
+                .forEach(
+                    function(row){
+
+                        const credits =
+                            Number(
+                                row.children[1].value
+                            );
+
+
+                        const marks =
+                            Number(
+                                row
+                                    .querySelector(".marks")
+                                    .value
+                            );
+
+
+                        if(
+                            credits > 0
+                            &&
+                            marks >= 0
+                            &&
+                            marks <= 100
+                        ){
+
+                            const points =
+                                gradePoint(marks)[1];
+
+
+                            totalCredits +=
+                                credits;
+
+
+                            totalPoints +=
+                                credits * points;
+
+
+                            totalMarks +=
+                                marks;
+
+
+                            count++;
+
+                        }
+
+                    }
+                );
+
+
+            const error =
+                document.getElementById(
+                    "sgpaError"
+                );
+
+
+            if(count === 0){
+
+                error.textContent =
+                    "PLEASE ENTER VALID CREDITS AND MARKS.";
+
+                return;
+
+            }
+
+
+            error.textContent = "";
+
+
+            document
+                .getElementById("totalMarks")
+                .textContent =
+                `${totalMarks.toFixed(2)} / ${count * 100}`;
+
+
+            document
+                .getElementById("percentage")
+                .textContent =
+                `${(totalMarks / count).toFixed(2)}%`;
+
+
+            document
+                .getElementById("totalCredits")
+                .textContent =
+                totalCredits;
+
+
+            document
+                .getElementById("sgpa")
+                .textContent =
+                (
+                    totalPoints /
+                    totalCredits
+                ).toFixed(2);
+
+        }
+    );
+
+
+
+/* =========================
+   ADD SEMESTER
+========================= */
+
+document
+    .getElementById("addSemester")
+    .addEventListener(
+        "click",
+        addSemester
+    );
+
+
+
+/* =========================
+   CALCULATE CGPA
+========================= */
+
+document
+    .getElementById("calculateCgpa")
+    .addEventListener(
+        "click",
+        function(){
+
+            let credits = 0;
+
+            let weighted = 0;
+
+
+            document
+                .querySelectorAll(
+                    "#semesters .cgpa-row"
+                )
+                .forEach(
+                    function(row){
+
+                        const c =
+                            Number(
+                                row.children[1].value
+                            );
+
+
+                        const s =
+                            Number(
+                                row.children[2].value
+                            );
+
+
+                        if(
+                            c > 0
+                            &&
+                            s >= 0
+                            &&
+                            s <= 10
+                        ){
+
+                            credits += c;
+
+                            weighted +=
+                                c * s;
+
+                        }
+
+                    }
+                );
+
+
+            const error =
+                document.getElementById(
+                    "cgpaError"
+                );
+
+
+            if(credits === 0){
+
+                error.textContent =
+                    "PLEASE ENTER VALID CREDITS AND SGPA.";
+
+                return;
+
+            }
+
+
+            error.textContent = "";
+
+
+            document
+                .getElementById("cgpaCredits")
+                .textContent =
+                credits;
+
+
+            document
+                .getElementById("cgpa")
+                .textContent =
+                (
+                    weighted /
+                    credits
+                ).toFixed(2);
+
+        }
+    );
+
+
+
+/* =========================
+   TABS
+========================= */
+
+const sgpaTab =
+    document.getElementById(
+        "sgpaTab"
+    );
+
+const cgpaTab =
+    document.getElementById(
+        "cgpaTab"
+    );
+
+const sgpaPanel =
+    document.getElementById(
+        "sgpaPanel"
+    );
+
+const cgpaPanel =
+    document.getElementById(
+        "cgpaPanel"
+    );
+
+
+sgpaTab.addEventListener(
+    "click",
+    function(){
+
+        sgpaTab.classList.add("active");
+
+        cgpaTab.classList.remove("active");
+
+        sgpaPanel.classList.remove("hidden");
+
+        cgpaPanel.classList.add("hidden");
+
+    }
+);
+
+
+cgpaTab.addEventListener(
+    "click",
+    function(){
+
+        cgpaTab.classList.add("active");
+
+        sgpaTab.classList.remove("active");
+
+        cgpaPanel.classList.remove("hidden");
+
+        sgpaPanel.classList.add("hidden");
+
+    }
+);
+
+</script>
+
+</body>
+</html>

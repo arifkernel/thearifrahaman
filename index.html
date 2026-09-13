@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="google-site-verification" content="63V6B_V_JzsThZkO5rZdUvfVcTf-FXQVLk0SKFlkKyw" />
 <title>ARIF RAHAMAN — Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
@@ -40,6 +39,24 @@ footer{padding:7vh 7vw;flex-direction:column;gap:18px;font-size:8px}.links{gap:1
 @media(max-width:380px){.hero-copy{top:28%}.name{font-size:18.5vw}.tag{font-size:7.5px}.panel{padding-top:14vh}.lead{font-size:17px}.title{font-size:19vw}.contact-link b{font-size:15px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.loader,.reveal,.name span{animation:none!important;transition:none!important}.name span{transform:none}.bg{transform:none!important}}
 
+
+/* TOOL BUTTON */
+.nav .tool-link{
+  border:1px solid rgba(255,255,255,.65);
+  padding:8px 13px;
+  margin-top:-8px;
+}
+.nav .tool-link::after{display:none!important}
+.nav .tool-link:hover{
+  background:#fff;
+  color:#050a10;
+}
+@media(max-width:700px){
+  .nav .tool-link{padding:7px 10px;margin-top:-7px}
+}
+
+.tool-menu{position:relative}.tool-link{cursor:pointer}.tool-dropdown{position:absolute;top:calc(100% + 14px);right:0;min-width:190px;padding:8px 0;background:rgba(5,10,16,.94);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(12px);opacity:0;visibility:hidden;transform:translateY(-6px);transition:.25s ease;z-index:50}.tool-menu:hover .tool-dropdown,.tool-menu.open .tool-dropdown{opacity:1;visibility:visible;transform:translateY(0)}.tool-dropdown a{display:block;padding:11px 15px;color:#fff;text-decoration:none;font-size:9px;letter-spacing:.13em;white-space:nowrap}.tool-dropdown a:hover{background:rgba(255,255,255,.08)}
+@media(max-width:800px){.tool-dropdown{right:0;min-width:165px}.tool-dropdown a{font-size:8px;padding:10px 12px}}
 </style>
 </head>
 <body>
@@ -49,7 +66,7 @@ footer{padding:7vh 7vw;flex-direction:column;gap:18px;font-size:8px}.links{gap:1
 
 <main>
 <section class="hero" id="home">
-<header><a class="brand magnetic" href="#home" aria-label="Arif Rahaman home"><img src="assets/ar-monogram.png" alt="AR"></a><nav class="nav"><a class="magnetic" href="#about">ABOUT</a><a class="magnetic" href="#projects">IDEAS</a><a class="magnetic" href="#contact">CONTACT</a></nav></header>
+<header><a class="brand magnetic" href="#home" aria-label="Arif Rahaman home"><img src="assets/ar-monogram.png" alt="AR"></a><nav class="nav"><a class="magnetic" href="#about">ABOUT</a><a class="magnetic" href="#projects">IDEAS</a><a class="magnetic" href="#contact">CONTACT</a><div class="tool-menu"><a class="magnetic tool-link" href="javascript:void(0)">TOOL</a><div class="tool-dropdown"><a href="cgpa-calculator.html">CGPA CALCULATOR</a></div></div></nav></header>
 <div class="hero-copy"><div class="eyebrow">HELLO, I'M</div><h1 class="name"><span>ARIF</span><span>RAHAMAN</span></h1><div class="tag">IDEAS / CODE / GROW / REPEAT<br><b>A BETTER VERSION EVERYDAY</b></div></div>
 <div class="side">SAME SKY / BIGGER DREAMS</div>
 <div class="meta"><span>INDIA&nbsp;&nbsp;/&nbsp;&nbsp;EST. 2025</span><span class="scroll"><i></i>SCROLL TO EXPLORE</span><span class="location">TURNING CURIOSITY INTO OPPORTUNITIES.</span></div>
@@ -104,6 +121,9 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.targ
 document.querySelectorAll('.reveal').forEach(e=>io.observe(e));
 addEventListener('load',()=>setTimeout(()=>document.querySelector('.loader').classList.add('hide'),1400));
 document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{const el=document.querySelector(a.getAttribute('href'));if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth'})}}));
+
+const toolMenu=document.querySelector('.tool-menu');
+if(toolMenu){toolMenu.querySelector('.tool-link').addEventListener('click',e=>{e.preventDefault();toolMenu.classList.toggle('open')});document.addEventListener('click',e=>{if(!toolMenu.contains(e.target))toolMenu.classList.remove('open')});}
 </script>
 </body>
 </html>
